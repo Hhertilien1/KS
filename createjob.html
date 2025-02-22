@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <nav>
+      <div class="nav-container">
+        <h1 class="brand-name">Kitchen Saver</h1> 
+        <button onclick="window.location.href='admin.html'">Home</button>
+        <button onclick="window.location.href='createemployee.html'">
+          Create Employee
+        </button>
+        <button onclick="window.location.href='updateprofile.html'">
+          Update Profile
+        </button>
+      </div>
+      <button onclick="window.location.href='login.html'">Logout</button>
+    </nav>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kitchen Saver</title>
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #427a49;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #641e1e;
+      }
+      .error {
+        color: red;
+      }
+
+      .status-to-do {
+        color: red;
+      }
+      .status-in-progress {
+        color: orange;
+      }
+      .status-completed {
+        color: green;
+      }
+      .status-no {
+        color: red;
+      }
+      .status-yes {
+        color: green;
+      }
+      input[type="file"] {
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="dashboard-headline">
+          Create Jobs - Organize Your Projects Seamlessly
+        </h1>
+        <h2 class="dashboard-subheadline">
+          Input job details, track progress, and manage tasks all in one place
+          with an intuitive interface.
+        </h2>
+      </header>
+      <form id="jobForm">
+        <label for="jobNumber">Job #: </label>
+        <input type="number" id="jobNumber" required /><br /><br />
+
+        <label for="jobName">Job Name: </label>
+        <input type="text" id="jobName" required /><br /><br />
+
+        <label for="numCabinets"># of Cabinets: </label>
+        <input type="number" id="numCabinets" required /><br /><br />
+
+        <label for="numUppers"># of Uppers: </label>
+        <input type="number" id="numUppers" required /><br /><br />
+
+        <label for="numLowers"># of Lowers: </label>
+        <input type="number" id="numLowers" required /><br /><br />
+
+        <label for="cabinetMaker">Cabinet Maker: </label>
+        <input type="text" id="cabinetMaker" required /><br /><br />
+
+        <label for="installer">Installer: </label>
+        <input type="text" id="installer" required /><br /><br />
+
+        <label for="dueDate">Due Date: </label>
+        <input type="date" id="dueDate" required /><br /><br />
+
+        <label for="jobColor">Job Color: </label>
+        <input type="text" id="jobColor" required /><br /><br />
+
+        <label for="office">Office: </label>
+        <select id="office" required>
+          <option value="">Select Office</option>
+          <option value="400">400</option>
+          <option value="402">402</option>
+          <option value="403">403</option></select
+        ><br /><br />
+
+        <label for="status">Status: </label>
+        <select id="status" required>
+          <option value="">Select Status</option>
+          <option value="To-Do">To-Do</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option></select
+        ><br /><br />
+
+        <label for="materialsOrdered">Materials Ordered: </label>
+        <select id="materialsOrdered" required>
+          <option value="">Select Status</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option></select
+        ><br /><br />
+
+        <label for="materialsArrived">Materials Arrived: </label>
+        <select id="materialsArrived" required>
+          <option value="">Select Status</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option></select
+        ><br /><br />
+
+        <button type="button" onclick="addJob()">Add Job</button>
+        <button type="button" onclick="updateJob()">Update Job</button>
+        <p class="error" id="error"></p>
+        <p class="success" id="success"></p>
+      </form>
+
+      <h1 class="table-name">Kitchen Saver Cabinets</h1>
+      <div class="filter-container">
+        <form id="filterForm">
+          <label for="filterOffice">Filter by Office:</label>
+          <select id="filterOffice" onchange="applyFilters()">
+            <option value="">All Offices</option>
+            <option value="400">400</option>
+            <option value="402">402</option>
+            <option value="403">403</option>
+          </select>
+
+          <label for="filterInstaller">Filter by Installer:</label>
+          <input
+            type="text"
+            id="filterInstaller"
+            placeholder="Installer Name"
+            oninput="applyFilters()"
+          />
+
+          <label for="filterStatus">Filter by Status:</label>
+          <select id="filterStatus" onchange="applyFilters()">
+            <option value="">All Statuses</option>
+            <option value="To-Do">To-Do</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+          <button type="button" onclick="showInstructions()">
+            How to Use Filters
+          </button>
+          <button type="button" onclick="clearFilters()">Clear Filters</button>
+        </form>
+      </div>
+
+      <div class="backdrop" id="backdrop" onclick="hideInstructions()"></div>
+      <div class="modal" id="modal">
+        <h2>How to Use Filters</h2>
+        <p>
+          Select filters from the dropdown menus to narrow down the displayed
+          jobs by office or status.
+        </p>
+        <p>Click "Apply" to see filtered results.</p>
+        <button onclick="hideInstructions()">Close</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Job #</th>
+            <th>Job Name</th>
+            <th># of Cabinets</th>
+            <th># of Uppers</th>
+            <th># of Lowers</th>
+            <th>Cabinet Maker</th>
+            <th>Installer</th>
+            <th>Due Date</th>
+            <th>Job Color</th>
+            <th>Office</th>
+            <th>Status</th>
+            <th>Materials Ordered</th>
+            <th>Materials Arrived</th>
+            <th>Photos</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="jobTableBody"></tbody>
+      </table>
+
+      <script>
+        let jobs = [
+          {
+            jobNumber: 101,
+            jobName: "Kitchen Remodel A",
+            numCabinets: 10,
+            numUppers: 6,
+            numLowers: 4,
+            cabinetMaker: "John Doe",
+            installer: "Mike Smith",
+            dueDate: "2025-02-15",
+            jobColor: "White",
+            office: "400",
+            status: "To-Do",
+            materialsOrdered: "Yes",
+            materialsArrived: "No",
+            photos: "",
+          },
+          {
+            jobNumber: 102,
+            jobName: "Kitchen Remodel B",
+            numCabinets: 15,
+            numUppers: 8,
+            numLowers: 7,
+            cabinetMaker: "Jane Doe",
+            installer: "Sarah Lee",
+            dueDate: "2025-03-10",
+            jobColor: "Blue",
+            office: "402",
+            status: "In Progress",
+            materialsOrdered: "No",
+            materialsArrived: "Yes",
+            photos: "",
+          },
+        ];
+
+
+        function addJob() {
+          const errorElement = document.getElementById("error");
+          const successElement = document.getElementById("success");
+          errorElement.textContent = "";
+          successElement.textContent = "";
+          const jobNumber = document.getElementById("jobNumber").value;
+          const jobName = document.getElementById("jobName").value;
+          const numCabinets = document.getElementById("numCabinets").value;
+          const numUppers = document.getElementById("numUppers").value;
+          const numLowers = document.getElementById("numLowers").value;
+          const cabinetMaker = document.getElementById("cabinetMaker").value;
+          const installer = document.getElementById("installer").value;
+          const dueDate = document.getElementById("dueDate").value;
+          const jobColor = document.getElementById("jobColor").value;
+          const office = document.getElementById("office").value;
+          const status = document.getElementById("status").value;
+
+          // Clear error message
+          errorElement.textContent = "";
+          successElement.textContent = "Job Added Successfully!";
+
+          // Validate inputs
+          if (
+            !jobNumber ||
+            !jobName ||
+            !numCabinets ||
+            !numUppers ||
+            !numLowers ||
+            !cabinetMaker ||
+            !installer ||
+            !dueDate ||
+            !jobColor ||
+            !office ||
+            !status
+          ) {
+            errorElement.textContent = "All fields are required.";
+            return;
+          }
+
+          // Add job to array
+          const job = {
+            jobNumber,
+            jobName,
+            numCabinets,
+            numUppers,
+            numLowers,
+            cabinetMaker,
+            installer,
+            dueDate,
+            jobColor,
+            office,
+            status,
+          };
+
+          jobs.push(job);
+
+          successElement.textContent = "Job Added Successfully!";
+          renderTable();
+          document.getElementById("jobForm").reset();
+        }
+
+        function updateJob() {
+          const jobNumber = document.getElementById("jobNumber").value;
+
+          // Find the job by job number
+          const jobIndex = jobs.findIndex((job) => job.jobNumber == jobNumber);
+
+          if (jobIndex !== -1) {
+            const updatedJob = {
+              jobNumber,
+              jobName: document.getElementById("jobName").value,
+              numCabinets: document.getElementById("numCabinets").value,
+              numUppers: document.getElementById("numUppers").value,
+              numLowers: document.getElementById("numLowers").value,
+              cabinetMaker: document.getElementById("cabinetMaker").value,
+              installer: document.getElementById("installer").value,
+              dueDate: document.getElementById("dueDate").value,
+              jobColor: document.getElementById("jobColor").value,
+              office: document.getElementById("office").value,
+              status: document.getElementById("status").value,
+            };
+
+            jobs[jobIndex] = {
+              jobNumber,
+              jobName,
+              numCabinets,
+              numUppers,
+              numLowers,
+              cabinetMaker,
+              installer,
+              dueDate,
+              jobColor,
+              office,
+              status,
+            };
+
+            jobs[jobIndex] = updatedJob;
+            document.getElementById("success").innerText =
+              "Job updated successfully!";
+            clearForm();
+            renderTable();
+          } else {
+            document.getElementById("error").innerText = "Job not found!";
+          }
+        }
+
+        // Helper function to clear the form after submitting
+        function clearForm() {
+          document.getElementById("jobForm").reset();
+        }
+
+        function renderTable(filteredJobs = jobs) {
+          const tableBody = document.getElementById("jobTableBody");
+          tableBody.innerHTML = "";
+
+          filteredJobs.forEach((job, index) => {
+            const row = document.createElement("tr");
+
+            let statusClass = "";
+            if (job.status === "To-Do") {
+              statusClass = "status-to-do";
+            } else if (job.status === "In Progress") {
+              statusClass = "status-in-progress";
+            } else if (job.status === "Completed") {
+              statusClass = "status-completed";
+            }
+
+            const materialsOrderedClass = job.materialsOrdered === "Yes" ? "status-yes" : "status-no";
+            const materialsArrivedClass = job.materialsArrived === "Yes" ? "status-yes" : "status-no";
+
+
+            row.innerHTML = `
+                <td>${job.jobNumber}</td>
+                <td>${job.jobName}</td>
+                <td>${job.numCabinets}</td>
+                <td>${job.numUppers}</td>
+                <td>${job.numLowers}</td>
+                <td>${job.cabinetMaker}</td>
+                <td>${job.installer}</td>
+                <td>${job.dueDate}</td>
+                <td>${job.jobColor}</td>
+                <td>${job.office}</td>
+                <td>
+                    <select onchange="updateStatus(${index}, this)" class="${statusClass}">
+                        <option value="To-Do" ${
+                          job.status === "To-Do" ? "selected" : ""
+                        }>To-Do</option>
+                        <option value="In Progress" ${
+                          job.status === "In Progress" ? "selected" : ""
+                        }>In Progress</option>
+                        <option value="Completed" ${
+                          job.status === "Completed" ? "selected" : ""
+                        }>Completed</option>
+                    </select>
+                </td>
+                <td>
+                        <select onchange="updateMaterialOrdered(${index}, this)" class="${materialsOrderedClass}">
+                            <option value="Yes" ${job.materialsOrdered === "Yes" ? "selected" : ""}>Yes</option>
+                            <option value="No" ${job.materialsOrdered === "No" ? "selected" : ""}>No</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select onchange="updateMaterialArrived(${index}, this)" class="${materialsArrivedClass}">
+                            <option value="Yes" ${job.materialsArrived === "Yes" ? "selected" : ""}>Yes</option>
+                            <option value="No" ${job.materialsArrived === "No" ? "selected" : ""}>No</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="file" onchange="uploadPhoto(${index}, this)" />
+                        ${job.photos ? `<a href="${job.photos}" target="_blank">View Photo</a>` : ""}
+                    </td>
+                <td class="actions">
+                    <button onclick="editJob(${index})">Edit</button>
+                    <button onclick="deleteJob(this)">Delete</button>
+                </td>
+            `;
+
+            tableBody.appendChild(row);
+          });
+        }
+
+        function updateMaterialOrdered(index, selectElement) {
+          const newMaterialOrdered = selectElement.value;
+          jobs[index].materialsOrdered = newMaterialOrdered;
+          applyFilters();
+        }
+
+        function updateMaterialArrived(index, selectElement) {
+          const newMaterialArrived = selectElement.value;
+          jobs[index].materialsArrived = newMaterialArrived;
+          applyFilters();
+        }
+
+        function uploadPhoto(index, inputElement) {
+          const file = inputElement.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              jobs[index].photos = e.target.result;
+              applyFilters();
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+
+        function clearFilters() {
+          document.getElementById("filterOffice").value = "";
+          document.getElementById("filterInstaller").value = "";
+          document.getElementById("filterStatus").value = "";
+          applyFilters(); // Reapply filters with cleared inputs
+        }
+
+        function applyFilters() {
+          const office = document.getElementById("filterOffice").value;
+          const installer = document
+            .getElementById("filterInstaller")
+            .value.toLowerCase();
+          const status = document.getElementById("filterStatus").value;
+
+          const filteredJobs = jobs.filter((job) => {
+            return (
+              (office === "" || job.office === office) &&
+              (installer === "" ||
+                job.installer.toLowerCase().includes(installer)) &&
+              (status === "" || job.status === status)
+            );
+          });
+
+          renderTable(filteredJobs);
+        }
+
+        function deleteJob(index) {
+          const confirmed = confirm(
+            "Are you sure you want to delete this job?"
+          );
+          if (confirmed) {
+            jobs.splice(index, 1);
+            applyFilters();
+          }
+        }
+
+        function editJob(index) {
+          const job = jobs[index];
+          document.getElementById("jobNumber").value = job.jobNumber;
+          document.getElementById("jobName").value = job.jobName;
+          document.getElementById("numCabinets").value = job.numCabinets;
+          document.getElementById("numUppers").value = job.numUppers;
+          document.getElementById("numLowers").value = job.numLowers;
+          document.getElementById("cabinetMaker").value = job.cabinetMaker;
+          document.getElementById("installer").value = job.installer;
+          document.getElementById("dueDate").value = job.dueDate;
+          document.getElementById("jobColor").value = job.jobColor;
+          document.getElementById("office").value = job.office;
+          document.getElementById("status").value = job.status;
+        }
+
+        function updateStatus(index, selectElement) {
+          const newStatus = selectElement.value;
+          jobs[index].status = newStatus;
+          applyFilters();
+        }
+
+        document.getElementById("modal").style.display = "none";
+        document.getElementById("backdrop").style.display = "none";
+
+        function showInstructions() {
+          // Show modal and backdrop when the link is clicked
+          document.getElementById("modal").style.display = "block";
+          document.getElementById("backdrop").style.display = "block";
+        }
+
+        function hideInstructions() {
+          // Hide modal and backdrop when closed
+          document.getElementById("modal").style.display = "none";
+          document.getElementById("backdrop").style.display = "none";
+        }
+
+        // Initial render
+        renderTable();
+      </script>
+    </div>
+    <footer class="footer">
+      <p>Kitchen Saver Cabinets - Internal Use Only</p>
+      <p>
+        Need help? Contact IT Support at
+        <a href="mailto:itsupport@kitchensaver.com"
+          >itsupport@kitchensaver.com</a
+        >
+        <!-- email is a dummy place holder untill i get the real IT email -->
+      </p>
+      <p>Demo Version 1.0 | Last Updated: Jan 2025</p>
+    </footer>
+  </body>
+</html>
+<link rel="stylesheet" href="style.css" />
